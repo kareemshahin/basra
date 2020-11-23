@@ -12,3 +12,14 @@ type Player struct {
 	Token string
 	Score int `json:"score"`
 }
+
+type Card struct {
+	Suit  string `json:"suit"`
+	Rank  string `json:"Rank"`
+	Value int    `json:"value"`
+}
+
+type HandScore struct {
+	Score    int
+	CardsWon []Card
+}
