@@ -4,6 +4,8 @@ const KING = "K"
 const QUEEN = "Q"
 const JACK = "J"
 
+// TODO: test the heck out of this logic
+
 func calculateBasra(cardPlayed Card, cardsOnTable []Card) HandScore {
 
 	// all cards match
