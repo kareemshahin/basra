@@ -16,9 +16,20 @@ func calculateBasra(cardPlayed Card, cardsOnTable []Card) HandScore {
 		return HandScore{Score: 10, CardsWon: cardsOnTable}
 	}
 
-	// TODO: Use subsetSum to figure out the combos that sum up to the card played
-	// and determined if its a basra or not and what cards they win. Might have to filter out
-	// any face cards or cards whose value is greater than the card played
+	/*
+		TODO: Use subsetSum to figure out the combos that sum up to the card played
+		and determined if its a basra or not and what cards they win. Might have to filter out
+		any face cards or cards whose value is greater than the card played.
+		It's possible that this new logic can eliminate the check above
+
+		if card played isFaceCard
+			only pick up face cards
+			basra should be covered in case above
+		else
+			filter out face cards and any cards greater than card played value
+			check for totals for cards won using subsetSum and check for basra (no cards left)
+		end
+	*/
 
 	return HandScore{Score: 0, CardsWon: []Card{}}
 }
