@@ -9,9 +9,11 @@ const KING = "K"
 const QUEEN = "Q"
 const JACK = "J"
 
+const DIAMONDS = "D"
+
 // TODO: test the heck out of this logic
 
-func calculateBasra(cardPlayed Card, cardsOnTable []Card) HandScore {
+func CalculateScore(cardPlayed Card, cardsOnTable []Card) HandScore {
 
 	// all cards match
 	if allEqual(cardPlayed, cardsOnTable) {
@@ -19,6 +21,23 @@ func calculateBasra(cardPlayed Card, cardsOnTable []Card) HandScore {
 			return HandScore{Score: 30, CardsWon: cardsOnTable}
 		}
 		return HandScore{Score: 10, CardsWon: cardsOnTable}
+	}
+
+	// Jack takes all
+	if cardPlayed.Rank == JACK {
+		return HandScore{Score: 0, CardsWon: cardsOnTable}
+	}
+
+	// King or Queen, collect matching faces
+	if cardPlayed.Rank == KING || cardPlayed.Rank == QUEEN {
+		return HandScore{Score: 0, CardsWon: getEqual(cardPlayed, cardsOnTable)}
+	}
+
+	// TODO: handle 7 of diamonds
+	if cardPlayed.Value == 7 && cardPlayed.Suit == DIAMONDS {
+		fmt.Println("TODO: handle 7 of diamonds")
+
+		return HandScore{Score: 0, CardsWon: cardsOnTable}
 	}
 
 	/*
@@ -38,11 +57,44 @@ func calculateBasra(cardPlayed Card, cardsOnTable []Card) HandScore {
 		end
 	*/
 
+	// If numerical card, find all possible totals that equal card played so we can
+	// collect those cards
+	if !isFaceCard(cardPlayed) {
+		// get all possible combination of totals of the card being played
+		var possibleTotals [][]int
+		var partials []int
+		candidateValues := extractPotentialValues(cardPlayed, cardsOnTable)
+		subsetSum(candidateValues, cardPlayed.Value, partials, &possibleTotals)
+
+		bestCardValues := getBestCombo(possibleTotals, candidateValues)
+		fmt.Println(bestCardValues)
+
+		// create lookup indexed by card value
+		var matchLookup map[int]Card
+		for _, v := range cardsOnTable {
+			matchLookup[v.Value] = v
+		}
+
+		// get any of the values that match a card to collect
+		var cardsToCollect []Card
+		for _, v := range bestCardValues {
+			if c, ok := matchLookup[v]; ok {
+				cardsToCollect = append(cardsToCollect, c)
+			}
+		}
+
+		if len(cardsToCollect) == len(cardsOnTable) {
+			return HandScore{Score: 10, CardsWon: cardsToCollect}
+		}
+
+		return HandScore{Score: 0, CardsWon: cardsToCollect}
+	}
+
 	return HandScore{Score: 0, CardsWon: []Card{}}
 }
 
 /*
-	Given an array of possible totals (from subsetSum), sorts them and finds the best combo
+	Given an array of possible total arrays (from subsetSum), sorts them and finds the best combo
 	of totals that includes the largest set of numbers.
 
 	Example:
@@ -51,7 +103,7 @@ func calculateBasra(cardPlayed Card, cardsOnTable []Card) HandScore {
 	possible combo of numbers that sum up to 7 [[1 4 2] [4 3] [2 5] [7]]
 	result of this function: [4 2 3 5 7]  (4 + 3, 5 + 2, 7)
 */
-func findWinners(totals [][]int, original []int) []int {
+func getBestCombo(totals [][]int, original []int) []int {
 	sort.Slice(totals, func(i, j int) bool { return len(totals[j]) < len(totals[i]) })
 	mostTaken := []int{0}
 
@@ -127,8 +179,8 @@ func subsetSum(numbers []int, target int, partial []int, res *[][]int) {
 	}
 }
 
-func isFaceCard(cardRank string) bool {
-	return cardRank == KING || cardRank == QUEEN || cardRank == JACK
+func isFaceCard(card Card) bool {
+	return card.Rank == KING || card.Rank == QUEEN || card.Rank == JACK
 }
 
 func allEqual(cardPlayed Card, cards []Card) bool {
@@ -139,4 +191,28 @@ func allEqual(cardPlayed Card, cards []Card) bool {
 	}
 
 	return true
+}
+
+func getEqual(cardPlayed Card, cards []Card) []Card {
+	var matchingCards []Card
+
+	for _, v := range cards {
+		if cardPlayed.Rank == v.Rank {
+			matchingCards = append(matchingCards, v)
+		}
+	}
+
+	return matchingCards
+}
+
+func extractPotentialValues(cardPlayed Card, cards []Card) []int {
+	var values []int
+
+	for _, v := range cards {
+		if !isFaceCard(cardPlayed) && v.Value >= cardPlayed.Value {
+			values = append(values, v.Value)
+		}
+	}
+
+	return values
 }
