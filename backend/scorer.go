@@ -11,6 +11,9 @@ const JACK = "J"
 
 const DIAMONDS = "D"
 
+const JACK_BASRA_SCORE = 30
+const BASRA_SCORE = 10
+
 // TODO: refactor this module, its ugly
 
 func CalculateScore(cardPlayed Card, cardsOnTable []Card) HandScore {
@@ -22,9 +25,9 @@ func CalculateScore(cardPlayed Card, cardsOnTable []Card) HandScore {
 	// all cards match
 	if allEqual(cardPlayed, cardsOnTable) {
 		if cardPlayed.Rank == JACK {
-			return HandScore{Score: 30, CardsWon: cardsOnTable}
+			return HandScore{Score: JACK_BASRA_SCORE, CardsWon: cardsOnTable}
 		}
-		return HandScore{Score: 10, CardsWon: cardsOnTable}
+		return HandScore{Score: BASRA_SCORE, CardsWon: cardsOnTable}
 	}
 
 	// Jack takes all
@@ -67,7 +70,7 @@ func scoreSevenDiamonds(cardsOnTable []Card) HandScore {
 			)
 
 			if len(possibleCardsCollected) == len(cardsOnTable) {
-				return HandScore{Score: 10, CardsWon: cardsOnTable}
+				return HandScore{Score: BASRA_SCORE, CardsWon: cardsOnTable}
 			}
 		}
 	}
@@ -98,7 +101,7 @@ func scoreNumericalCard(cardPlayed Card, cardsOnTable []Card) HandScore {
 	}
 
 	if len(cardsToCollect) == len(cardsOnTable) {
-		return HandScore{Score: 10, CardsWon: cardsToCollect}
+		return HandScore{Score: BASRA_SCORE, CardsWon: cardsToCollect}
 	}
 
 	return HandScore{Score: 0, CardsWon: cardsToCollect}
