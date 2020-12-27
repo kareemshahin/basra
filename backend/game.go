@@ -18,6 +18,7 @@ const ROUND_IN_PROGRESS = "round_in_progress"
 const END_OF_ROUND = "end_of_round"
 const COMPLETED = "completed"
 
+// TODO: add creator to game
 func CreateGame(name string) (Game, error) {
 	newId, err := uuid.NewUUID()
 
@@ -27,9 +28,10 @@ func CreateGame(name string) (Game, error) {
 	}
 
 	newGame := Game{
-		ID:    newId,
-		Name:  name,
-		State: NEW_GAME,
+		ID:      newId,
+		Name:    name,
+		State:   NEW_GAME,
+		Players: []GamePlayer{},
 	}
 
 	games[newId] = newGame
