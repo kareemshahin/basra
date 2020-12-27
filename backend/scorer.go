@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sort"
 	"strconv"
 )
@@ -38,10 +37,10 @@ func CalculateScore(cardPlayed Card, cardsOnTable []Card) HandScore {
 		return HandScore{Score: 0, CardsWon: getEqual(cardPlayed, cardsOnTable)}
 	}
 
+	// 7 of diamonds can collect or score basra if total of card values
+	// are 10 or under
 	if cardPlayed.Value == 7 && cardPlayed.Suit == DIAMONDS {
-		if hasFaceCard(cardsOnTable) {
-			return HandScore{Score: 0, CardsWon: cardsOnTable}
-		} else {
+		if !hasFaceCard(cardsOnTable) {
 			possibleInts := []int{10, 9, 8, 7, 6, 5, 4, 3, 2, 1}
 
 			for _, v := range possibleInts {
@@ -55,6 +54,8 @@ func CalculateScore(cardPlayed Card, cardsOnTable []Card) HandScore {
 				}
 			}
 		}
+
+		return HandScore{Score: 0, CardsWon: cardsOnTable}
 	}
 
 	// If numerical card, find all possible totals that equal card played so we can

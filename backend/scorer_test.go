@@ -252,6 +252,24 @@ func TestCalculateScoreSevenDiamondsCollectAll(t *testing.T) {
 	if len(handScore1.CardsWon) != len(cardsOnTable1) {
 		t.Errorf("Cards won = %d; want %d", len(handScore1.CardsWon), len(cardsOnTable1))
 	}
+
+	cardsOnTable2 := []Card{
+		{Suit: "D", Rank: "6", Value: 6},
+		{Suit: "C", Rank: "2", Value: 2},
+		{Suit: "D", Rank: "9", Value: 9},
+		{Suit: "H", Rank: "2", Value: 2},
+	}
+
+	handScore2 := CalculateScore(cardPlayed, cardsOnTable2)
+
+	if handScore2.Score != 0 {
+		t.Errorf("Hand score = %d; want 0", handScore2.Score)
+	}
+
+	// 7 diamonds should collect all cards
+	if len(handScore2.CardsWon) != len(cardsOnTable2) {
+		t.Errorf("Cards won = %d; want %d", len(handScore2.CardsWon), len(cardsOnTable2))
+	}
 }
 
 func TestCalculateScoreSevenDiamondsBasra(t *testing.T) {
