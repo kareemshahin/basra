@@ -40,52 +40,68 @@ func CalculateScore(cardPlayed Card, cardsOnTable []Card) HandScore {
 	// 7 of diamonds can collect or score basra if total of card values
 	// are 10 or under
 	if cardPlayed.Value == 7 && cardPlayed.Suit == DIAMONDS {
-		if !hasFaceCard(cardsOnTable) {
-			possibleInts := []int{10, 9, 8, 7, 6, 5, 4, 3, 2, 1}
-
-			for _, v := range possibleInts {
-				possibleCardsCollected := getBestCombo(
-					Card{Value: v, Suit: DIAMONDS, Rank: strconv.Itoa(v)},
-					cardsOnTable,
-				)
-
-				if len(possibleCardsCollected) == len(cardsOnTable) {
-					return HandScore{Score: 10, CardsWon: cardsOnTable}
-				}
-			}
-		}
-
-		return HandScore{Score: 0, CardsWon: cardsOnTable}
+		return scoreSevenDiamonds(cardsOnTable)
 	}
 
 	// If numerical card, find all possible totals that equal card played so we can
 	// collect those cards
 	if !isFaceCard(cardPlayed) {
-		// get all possible combination of totals of the card being played
-		bestCardValues := getBestCombo(cardPlayed, cardsOnTable)
-
-		// create lookup indexed by card value
-		matchLookup := make(map[int]Card)
-		for _, v := range cardsOnTable {
-			matchLookup[v.Value] = v
-		}
-
-		// get any of the values that match a card to collect
-		var cardsToCollect []Card
-		for _, v := range bestCardValues {
-			if c, ok := matchLookup[v]; ok {
-				cardsToCollect = append(cardsToCollect, c)
-			}
-		}
-
-		if len(cardsToCollect) == len(cardsOnTable) {
-			return HandScore{Score: 10, CardsWon: cardsToCollect}
-		}
-
-		return HandScore{Score: 0, CardsWon: cardsToCollect}
+		return scoreNumericalCard(cardPlayed, cardsOnTable)
 	}
 
 	return HandScore{Score: 0, CardsWon: []Card{}}
+}
+
+/*
+	Seven of diamonds should check for basra (any combos of totals
+	that sum up to 10 or less) or just collect all cards
+*/
+func scoreSevenDiamonds(cardsOnTable []Card) HandScore {
+	if !hasFaceCard(cardsOnTable) {
+		possibleInts := []int{10, 9, 8, 7, 6, 5, 4, 3, 2, 1}
+
+		for _, v := range possibleInts {
+			possibleCardsCollected := getBestCombo(
+				Card{Value: v, Suit: DIAMONDS, Rank: strconv.Itoa(v)},
+				cardsOnTable,
+			)
+
+			if len(possibleCardsCollected) == len(cardsOnTable) {
+				return HandScore{Score: 10, CardsWon: cardsOnTable}
+			}
+		}
+	}
+
+	return HandScore{Score: 0, CardsWon: cardsOnTable}
+}
+
+/*
+	If card is numerical, find all possible totals that equal the card played
+	and collect
+*/
+func scoreNumericalCard(cardPlayed Card, cardsOnTable []Card) HandScore {
+	// get all possible combination of totals of the card being played
+	bestCardValues := getBestCombo(cardPlayed, cardsOnTable)
+
+	// create lookup indexed by card value
+	matchLookup := make(map[int]Card)
+	for _, v := range cardsOnTable {
+		matchLookup[v.Value] = v
+	}
+
+	// get any of the values that match a card to collect
+	var cardsToCollect []Card
+	for _, v := range bestCardValues {
+		if c, ok := matchLookup[v]; ok {
+			cardsToCollect = append(cardsToCollect, c)
+		}
+	}
+
+	if len(cardsToCollect) == len(cardsOnTable) {
+		return HandScore{Score: 10, CardsWon: cardsToCollect}
+	}
+
+	return HandScore{Score: 0, CardsWon: cardsToCollect}
 }
 
 /*
@@ -160,7 +176,8 @@ func sumArray(values []int) int {
 /*
 	Recursively calculate all possible sums and only append to res parameter
 	if it equals the target. The result is passed in by reference and matching combinations
-	are then appended
+	are then appended. For example, for a target with a value of 5, and numbers = [1, 4, 3, 2, 6],
+	the possible sums that equal 5 are 1+4 and 3+2 so "res" would contain [[1,4],[2,3]].
 
 	TODO: change to use array of cards rather than integers
 */
