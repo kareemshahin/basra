@@ -19,7 +19,7 @@ const BASRA_SCORE = 10
 func CalculateScore(cardPlayed Card, cardsOnTable []Card) HandScore {
 	// if no cards on table, can't win any cards or score
 	if len(cardsOnTable) == 0 {
-		return HandScore{Score: 0, CardsWon: cardsOnTable}
+		return HandScore{Score: 0, CardsWon: []Card{}}
 	}
 
 	// all cards match

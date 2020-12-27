@@ -7,19 +7,6 @@ import (
 	"net/http"
 )
 
-var games = []Game{
-	{
-		ID:    1,
-		Name:  "game 1",
-		State: "new",
-	},
-	{
-		ID:    2,
-		Name:  "game 2",
-		State: "in_progress",
-	},
-}
-
 func main() {
 	fmt.Println("Hello, World!")
 
@@ -31,19 +18,25 @@ func main() {
 }
 
 func getGames(w http.ResponseWriter, r *http.Request) {
+	games = GetGames()
+
 	fmt.Println(games)
 	respondWithJSON(w, http.StatusOK, games)
 }
 
 func createGame(w http.ResponseWriter, r *http.Request) {
-	new_game := Game{
-		ID:    3,
-		Name:  "game 3",
-		State: "new_game",
-	}
+	var gameReq Game
+	err := json.NewDecoder(r.Body).Decode(&gameReq)
 
-	games = append(games, new_game)
-	respondWithJSON(w, http.StatusOK, new_game)
+	if err != nil {
+		respondWithError(w, 400, err.Error())
+	}
+	newGame, createErr := CreateGame(gameReq.Name)
+
+	if createErr != nil {
+		respondWithError(w, 400, createErr.Error())
+	}
+	respondWithJSON(w, http.StatusOK, newGame)
 }
 
 func respondWithError(w http.ResponseWriter, code int, message string) {

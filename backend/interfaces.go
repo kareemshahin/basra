@@ -1,16 +1,19 @@
 package main
 
+import "github.com/google/uuid"
+
 type Game struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	State string `json:"state"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	State string    `json:"state"`
 }
 
 type Player struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Token string
-	Score int `json:"score"`
+	ID             int    `json:"id"`
+	Name           string `json:"name"`
+	Score          int    `json:"score"`
+	Hand           []Card `json:"hand"`
+	CardsCollected []Card `json:"cards_collectd"`
 }
 
 type Card struct {
