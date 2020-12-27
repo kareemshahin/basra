@@ -253,3 +253,33 @@ func TestCalculateScoreSevenDiamondsCollectAll(t *testing.T) {
 		t.Errorf("Cards won = %d; want %d", len(handScore1.CardsWon), len(cardsOnTable1))
 	}
 }
+
+func TestCalculateScoreSevenDiamondsBasra(t *testing.T) {
+	cardPlayed := Card{
+		Suit:  "D",
+		Rank:  "7",
+		Value: 7,
+	}
+
+	// Should all total 8 and get a basra
+	// 6 + 2, 3 + 1 + 4, 8
+	cardsOnTable := []Card{
+		{Suit: "D", Rank: "6", Value: 6},
+		{Suit: "C", Rank: "2", Value: 2},
+		{Suit: "D", Rank: "8", Value: 8},
+		{Suit: "H", Rank: "3", Value: 3},
+		{Suit: "H", Rank: "1", Value: 1},
+		{Suit: "S", Rank: "4", Value: 4},
+	}
+
+	handScore := CalculateScore(cardPlayed, cardsOnTable)
+
+	if handScore.Score != 10 {
+		t.Errorf("Hand score = %d; want 0", handScore.Score)
+	}
+
+	// 7 diamonds should collect all cards
+	if len(handScore.CardsWon) != len(cardsOnTable) {
+		t.Errorf("Cards won = %d; want %d", len(handScore.CardsWon), len(cardsOnTable))
+	}
+}

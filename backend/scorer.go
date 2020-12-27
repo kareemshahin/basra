@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"sort"
+	"strconv"
 )
 
 const KING = "K"
@@ -14,6 +15,10 @@ const DIAMONDS = "D"
 // TODO: refactor this module, its ugly
 
 func CalculateScore(cardPlayed Card, cardsOnTable []Card) HandScore {
+	// if no cards on table, can't win any cards or score
+	if len(cardsOnTable) == 0 {
+		return HandScore{Score: 0, CardsWon: cardsOnTable}
+	}
 
 	// all cards match
 	if allEqual(cardPlayed, cardsOnTable) {
@@ -33,28 +38,30 @@ func CalculateScore(cardPlayed Card, cardsOnTable []Card) HandScore {
 		return HandScore{Score: 0, CardsWon: getEqual(cardPlayed, cardsOnTable)}
 	}
 
-	// TODO: handle 7 of diamonds
 	if cardPlayed.Value == 7 && cardPlayed.Suit == DIAMONDS {
-		fmt.Println("TODO: handle 7 of diamonds")
-		// TODO: handle basra case if cards total less than or equal to 10
 		if hasFaceCard(cardsOnTable) {
 			return HandScore{Score: 0, CardsWon: cardsOnTable}
-		}
+		} else {
+			possibleInts := []int{10, 9, 8, 7, 6, 5, 4, 3, 2, 1}
 
-		// collect all cards
-		return HandScore{Score: 0, CardsWon: cardsOnTable}
+			for _, v := range possibleInts {
+				possibleCardsCollected := getBestCombo(
+					Card{Value: v, Suit: DIAMONDS, Rank: strconv.Itoa(v)},
+					cardsOnTable,
+				)
+
+				if len(possibleCardsCollected) == len(cardsOnTable) {
+					return HandScore{Score: 10, CardsWon: cardsOnTable}
+				}
+			}
+		}
 	}
 
 	// If numerical card, find all possible totals that equal card played so we can
 	// collect those cards
 	if !isFaceCard(cardPlayed) {
 		// get all possible combination of totals of the card being played
-		var possibleTotals [][]int
-		var partials []int
-		candidateValues := extractPotentialValues(cardPlayed, cardsOnTable)
-		subsetSum(candidateValues, cardPlayed.Value, partials, &possibleTotals)
-
-		bestCardValues := getBestCombo(possibleTotals, candidateValues)
+		bestCardValues := getBestCombo(cardPlayed, cardsOnTable)
 
 		// create lookup indexed by card value
 		matchLookup := make(map[int]Card)
@@ -85,30 +92,36 @@ func CalculateScore(cardPlayed Card, cardsOnTable []Card) HandScore {
 	of totals that includes the largest set of numbers.
 
 	Example:
-	target sum: 7
-	possible numbers: [1 4 2 3 5 7]
+	target sum: 7 (car played)
+	possible numbers: [1 4 2 3 5 7] (cardsOnTable)
 	possible combo of numbers that sum up to 7 [[1 4 2] [4 3] [2 5] [7]]
 	result of this function: [4 2 3 5 7]  (4 + 3, 5 + 2, 7)
 */
-func getBestCombo(totals [][]int, original []int) []int {
-	sort.Slice(totals, func(i, j int) bool { return len(totals[j]) < len(totals[i]) })
+func getBestCombo(cardPlayed Card, cardsOnTable []Card) []int {
+	var possibleTotals [][]int
+	var partials []int
+
+	candidateValues := extractPotentialValues(cardPlayed, cardsOnTable)
+	subsetSum(candidateValues, cardPlayed.Value, partials, &possibleTotals)
+
+	sort.Slice(possibleTotals, func(i, j int) bool { return len(possibleTotals[j]) < len(possibleTotals[i]) })
 	mostTaken := []int{0}
 
-	for i, v := range totals {
+	for i, v := range possibleTotals {
 
-		remainder := arrayDifference(original, v)
-		if (len(original) - len(remainder)) != len(v) {
+		remainder := arrayDifference(candidateValues, v)
+		if (len(candidateValues) - len(remainder)) != len(v) {
 			continue
 		}
-		fmt.Println("remaining", remainder)
-		for j := i + 1; j < len(totals); j++ {
-			newRem := arrayDifference(remainder, totals[j])
-			if (len(remainder) - len(newRem)) != len(totals[j]) {
+
+		for j := i + 1; j < len(possibleTotals); j++ {
+			newRem := arrayDifference(remainder, possibleTotals[j])
+			if (len(remainder) - len(newRem)) != len(possibleTotals[j]) {
 				continue
 			}
 			remainder = newRem
 		}
-		newTaken := arrayDifference(original, remainder)
+		newTaken := arrayDifference(candidateValues, remainder)
 
 		if len(newTaken) > len(mostTaken) {
 			mostTaken = newTaken
